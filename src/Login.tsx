@@ -1,9 +1,10 @@
+import { useLoginStore } from "@src/store/store";
+import { auth, loginProvider } from "@src/utils/firestoreSetup";
 import { signInWithPopup, signOut } from "firebase/auth";
-import { auth, loginProvider } from "./utils/firestoreSetup";
-import { useLoginStore } from "./store/store";
 
 const Login = () => {
-  const isLogin = useLoginStore((state) => state.isLogin);
+  const isLogin = useLoginStore.use.isLogin();
+
   return (
     <button
       onClick={() => {

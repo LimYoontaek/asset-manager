@@ -22,10 +22,9 @@ const App = () => {
     DocumentData
   > | null>();
   const [addBadge, setAddBadge] = useState<boolean>(false);
-  const [isLogin, setIsLogin] = useLoginStore((state) => [
-    state.isLogin,
-    state.setIsLogin,
-  ]);
+
+  const isLogin = useLoginStore.use.isLogin();
+  const setIsLogin = useLoginStore.use.setIsLogin();
 
   const closeBadgeDetail = useCallback(() => {
     setSelectedBadge(null);
