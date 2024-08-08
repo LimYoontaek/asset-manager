@@ -9,7 +9,9 @@ import {
 import { BadgeType } from "@type/badges";
 import AddBadge from "@src/AddBadge";
 import EditBadge from "@src/EditBadge";
-import { badgeQuery } from "@util/firestoreSetup";
+import { auth, badgeQuery } from "@util/firestoreSetup";
+import Login from "./Login";
+import { onAuthStateChanged } from "firebase/auth";
 
 const App = () => {
   const [data, setData] =
@@ -17,8 +19,9 @@ const App = () => {
   const [selectedBadge, setSelectedBadge] = useState<QueryDocumentSnapshot<
     DocumentData,
     DocumentData
-  > | null>(null);
+  > | null>();
   const [addBadge, setAddBadge] = useState<boolean>(false);
+  const [isLogin, setIsLogin] = useState(false);
 
   const closeBadgeDetail = useCallback(() => {
     setSelectedBadge(null);
@@ -47,52 +50,72 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log(`user:`, user);
+        setIsLogin(true);
+      } else {
+        setIsLogin(false);
+      }
+    });
+
+    return () => {
+      unsub();
+    };
+  }, []);
+
   return (
     <>
-      <div className="flex w-full flex-col gap-x-4 sm:flex-row">
-        <div className="sm:w-[50%]">
-          <div className="mb-4 flex items-center sm:text-center">
-            <p className="grow">Badges({data?.length})</p>
-            <button
-              className="h-fit w-fit"
-              onClick={() => {
-                setAddBadge((current) => !current);
-                closeBadgeDetail();
-              }}
-            >
-              Add
-            </button>
-          </div>
-          {data &&
-            data.map((badgeDoc) => {
-              const badge = badgeDoc.data() as BadgeType;
-              return (
-                <p
-                  className="my-4 cursor-pointer border-b-2"
-                  key={badge.id}
+      <Login />
+      {isLogin && (
+        <>
+          <div className="flex w-full flex-col gap-x-4 sm:flex-row">
+            <div className="sm:w-[50%]">
+              <div className="mb-4 flex items-center sm:text-center">
+                <p className="grow">Badges({data?.length})</p>
+                <button
+                  className="h-fit w-fit"
                   onClick={() => {
-                    if (selectedBadge !== badgeDoc) {
-                      setSelectedBadge(badgeDoc);
-                    } else {
-                      closeBadgeDetail();
-                    }
+                    setAddBadge((current) => !current);
+                    closeBadgeDetail();
                   }}
-                  aria-hidden="true"
-                >{`${badge.title} / ${badge["sub-title"]}`}</p>
-              );
-            })}
-        </div>
-        <div className="sm:w-[50%]">
-          {!addBadge && selectedBadge && (
-            <EditBadge
-              key={selectedBadge.id}
-              selectedBadge={selectedBadge}
-              closeBadgeDetail={closeBadgeDetail}
-            />
-          )}
-          {addBadge && <AddBadge setAddBadge={setAddBadge} />}
-        </div>
-      </div>
+                >
+                  Add
+                </button>
+              </div>
+              {data &&
+                data.map((badgeDoc) => {
+                  const badge = badgeDoc.data() as BadgeType;
+                  return (
+                    <p
+                      className="my-4 cursor-pointer border-b-2"
+                      key={badge.id}
+                      onClick={() => {
+                        if (selectedBadge !== badgeDoc) {
+                          setSelectedBadge(badgeDoc);
+                        } else {
+                          closeBadgeDetail();
+                        }
+                      }}
+                      aria-hidden="true"
+                    >{`${badge.title} / ${badge["sub-title"]}`}</p>
+                  );
+                })}
+            </div>
+            <div className="sm:w-[50%]">
+              {!addBadge && selectedBadge && (
+                <EditBadge
+                  key={selectedBadge.id}
+                  selectedBadge={selectedBadge}
+                  closeBadgeDetail={closeBadgeDetail}
+                />
+              )}
+              {addBadge && <AddBadge setAddBadge={setAddBadge} />}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 };
