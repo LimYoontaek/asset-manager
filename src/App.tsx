@@ -12,6 +12,7 @@ import EditBadge from "@src/EditBadge";
 import { auth, badgeQuery } from "@util/firestoreSetup";
 import Login from "./Login";
 import { onAuthStateChanged } from "firebase/auth";
+import { useLoginStore } from "./store/store";
 
 const App = () => {
   const [data, setData] =
@@ -21,7 +22,10 @@ const App = () => {
     DocumentData
   > | null>();
   const [addBadge, setAddBadge] = useState<boolean>(false);
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useLoginStore((state) => [
+    state.isLogin,
+    state.setIsLogin,
+  ]);
 
   const closeBadgeDetail = useCallback(() => {
     setSelectedBadge(null);

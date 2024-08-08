@@ -1,11 +1,13 @@
 import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, loginProvider } from "./utils/firestoreSetup";
+import { useLoginStore } from "./store/store";
 
 const Login = () => {
+  const isLogin = useLoginStore((state) => state.isLogin);
   return (
     <button
       onClick={() => {
-        if (!auth.currentUser) {
+        if (!isLogin) {
           signInWithPopup(auth, loginProvider)
             .then((result) => {
               console.log(`login result:`, result);
