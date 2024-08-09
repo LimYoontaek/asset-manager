@@ -22,7 +22,7 @@ const EditBadge = ({ selectedBadge, closeBadgeDetail }: Props) => {
 
   const updateBadgeData = async (id: string, newData: JsonData) => {
     await setDoc(
-      doc(database, "root/badges/badgeList", id),
+      doc(database, "badges/badges/list", id),
       JSON.parse(JSON.stringify(newData)),
     )
       .then(() => {
@@ -35,7 +35,7 @@ const EditBadge = ({ selectedBadge, closeBadgeDetail }: Props) => {
   };
 
   const deleteBadge = async (id: string) => {
-    await deleteDoc(doc(database, "root/badges/badgeList", id))
+    await deleteDoc(doc(database, "badges/badges/list", id))
       .then(() => {
         closeBadgeDetail();
         setSelectedBadgeData({});
