@@ -1,7 +1,7 @@
-import * as badges from "../../public/badges.json";
-import { addDoc, collection, getDocs, setDoc, doc } from "firebase/firestore";
-import { badgeRef, database } from "../utils/firestoreSetup";
-import { BadgeType, GenderBadgeType } from "../types/badges";
+// import * as badges from "../../public/badges.json";
+// import { addDoc, collection, getDocs, setDoc, doc } from "firebase/firestore";
+// import { badgeRef, database } from "../utils/firestoreSetup";
+// import { BadgeType, GenderBadgeType } from "../types/badges";
 
 // const addDocument = async (badge: BadgeType) => {
 //   await addDoc(badgeRef, badge)
@@ -16,17 +16,17 @@ import { BadgeType, GenderBadgeType } from "../types/badges";
 // badges.json.badges.badges.map((badge: BadgeType) => {
 //   addDocument(badge).catch((e) => console.log(`batch operation error.`, e));
 // });
-badges.json.badges.male.map((badge: GenderBadgeType) => {
-  const newRef = collection(database, "badges/male/list");
-  const addDocs = async () => {
-    await addDoc(newRef, badge).then((data) => {
-      console.log(`new doc added: `, data.id);
-    });
-  };
-  addDocs().catch((e) => {
-    console.error(`add male badge failed`, e);
-  });
-});
+// badges.json.badges.male.map((badge: GenderBadgeType) => {
+//   const newRef = collection(database, "badges/male/list");
+//   const addDocs = async () => {
+//     await addDoc(newRef, badge).then((data) => {
+//       console.log(`new doc added: `, data.id);
+//     });
+//   };
+//   addDocs().catch((e) => {
+//     console.error(`add male badge failed`, e);
+//   });
+// });
 
 // const copyDocs = () => {
 //   // const root = collection(database, "root");
