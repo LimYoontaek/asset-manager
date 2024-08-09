@@ -93,6 +93,7 @@ const App = () => {
 
   return (
     <>
+      <h1 className="w-full text-center">Asset Manager</h1>
       <div className="flex justify-between">
         <Login />
         {isLogin && (
