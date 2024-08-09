@@ -9,10 +9,11 @@ import {
 import { BadgeType } from "@type/badges";
 import AddBadge from "@src/AddBadge";
 import EditBadge from "@src/EditBadge";
-import { auth, badgeQuery } from "@util/firestoreSetup";
+import { auth, badgeQuery, storageRef } from "@util/firestoreSetup";
 import Login from "./Login";
 import { onAuthStateChanged } from "firebase/auth";
 import { useLoginStore } from "./store/store";
+import { ref, uploadBytes } from "firebase/storage";
 
 const App = () => {
   const [data, setData] =
@@ -22,6 +23,7 @@ const App = () => {
     DocumentData
   > | null>();
   const [addBadge, setAddBadge] = useState<boolean>(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const isLogin = useLoginStore.use.isLogin();
   const setIsLogin = useLoginStore.use.setIsLogin();
@@ -29,6 +31,27 @@ const App = () => {
   const closeBadgeDetail = useCallback(() => {
     setSelectedBadge(null);
   }, []);
+
+  const exportBadges = () => {
+    setIsExporting(true);
+
+    const badgeList = data?.map((badgeDoc) => JSON.stringify(badgeDoc.data()));
+    const badgeBlob = new Blob([JSON.stringify(badgeList)], {
+      type: "application/json",
+    });
+    const badgeRef = ref(storageRef, "badges.json");
+
+    uploadBytes(badgeRef, badgeBlob)
+      .then(() => {
+        console.log("badges uploaded.");
+      })
+      .catch((e) => {
+        console.error("badge upload failed.", e);
+      })
+      .finally(() => {
+        setIsExporting(() => false);
+      });
+  };
 
   useEffect(() => {
     const getBadgeData = async () => {
@@ -66,11 +89,22 @@ const App = () => {
     return () => {
       unsub();
     };
-  }, []);
+  }, [setIsLogin]);
 
   return (
     <>
-      <Login />
+      <div className="flex justify-between">
+        <Login />
+        {isLogin && (
+          <button
+            className="disabled:border-none disabled:bg-stone-50 disabled:text-slate-300"
+            onClick={exportBadges}
+            disabled={isExporting}
+          >
+            Export
+          </button>
+        )}
+      </div>
       {isLogin && (
         <>
           <div className="flex w-full flex-col gap-x-4 sm:flex-row">
