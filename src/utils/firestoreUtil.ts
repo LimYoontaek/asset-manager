@@ -1,7 +1,7 @@
 import * as badges from "../../public/badges.json";
 import { addDoc, collection, getDocs, setDoc, doc } from "firebase/firestore";
 import { badgeRef, database } from "../utils/firestoreSetup";
-import { BadgeType, FemaleBadgeType } from "../types/badges";
+import { BadgeType, GenderBadgeType } from "../types/badges";
 
 // const addDocument = async (badge: BadgeType) => {
 //   await addDoc(badgeRef, badge)
@@ -16,7 +16,7 @@ import { BadgeType, FemaleBadgeType } from "../types/badges";
 // badges.json.badges.badges.map((badge: BadgeType) => {
 //   addDocument(badge).catch((e) => console.log(`batch operation error.`, e));
 // });
-badges.json.badges.male.map((badge: FemaleBadgeType) => {
+badges.json.badges.male.map((badge: GenderBadgeType) => {
   const newRef = collection(database, "badges/male/list");
   const addDocs = async () => {
     await addDoc(newRef, badge).then((data) => {

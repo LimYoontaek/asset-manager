@@ -84,3 +84,10 @@ export const defaultBadgeData = {
   message: "",
   verified: [],
 };
+
+export interface GenderBadgeType {
+  badges: number[];
+  register?: number;
+  "show-mark-badge-list"?: boolean;
+  title: string;
+}
