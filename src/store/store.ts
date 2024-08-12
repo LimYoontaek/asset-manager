@@ -5,13 +5,26 @@ interface LoginState {
   isLogin: boolean;
   setIsLogin: (isLogin: boolean) => void;
 }
+
+interface MenuState {
+  selectedMenu: number;
+  setMenu: (menu: number) => void;
+}
 const useLoginStoreBase = create<LoginState>()(
   devtools((set) => ({
     isLogin: false,
     setIsLogin: (isLogin) => set(() => ({ isLogin })),
   })),
 );
-
+const useMenuStoreBase = create<MenuState>()(
+  devtools((set) => ({
+    selectedMenu: 0,
+    setMenu: (menu: number) =>
+      set(() => ({
+        selectedMenu: menu,
+      })),
+  })),
+);
 type WithSelectors<S> = S extends { getState: () => infer T }
   ? S & { use: { [K in keyof T]: () => T[K] } }
   : never;
@@ -30,3 +43,4 @@ const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
 };
 
 export const useLoginStore = createSelectors(useLoginStoreBase);
+export const useMenuStore = createSelectors(useMenuStoreBase);
