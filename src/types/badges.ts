@@ -91,3 +91,25 @@ export interface GenderBadgeType {
   "show-mark-badge-list"?: boolean;
   title: string;
 }
+
+export interface RevisionType {
+  revision: number;
+}
+
+export interface TipsType {
+  approved: string;
+  rejected: string;
+  requested: string;
+}
+
+export type BadgeJsonType =
+  | BadgeType[]
+  | GenderBadgeType[]
+  | RevisionType
+  | TipsType;
+
+export type BadgeUnionType =
+  | BadgeType
+  | GenderBadgeType
+  | RevisionType
+  | TipsType;
