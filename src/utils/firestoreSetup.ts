@@ -16,4 +16,6 @@ export const loginProvider = new GoogleAuthProvider();
 export const auth = getAuth();
 
 const storage = getStorage();
-export const storageRef: StorageReference = ref(storage, "Badges");
+export const storagePath = "goldspoon/qa";
+export const storageRef: StorageReference = ref(storage, storagePath);
+export const jsonRef = ref(storageRef, "badges.json");
