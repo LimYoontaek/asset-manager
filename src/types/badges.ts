@@ -102,14 +102,6 @@ export interface TipsType {
   requested: string;
 }
 
-export type BadgeJsonType =
-  | BadgeType[]
-  | GenderBadgeType[]
-  | RevisionType
-  | TipsType;
+export type BadgeJsonType = BadgeType[] | GenderBadgeType[] | number | TipsType;
 
-export type BadgeUnionType =
-  | BadgeType
-  | GenderBadgeType
-  | RevisionType
-  | TipsType;
+export type BadgeUnionType = BadgeType | GenderBadgeType | number | TipsType;
