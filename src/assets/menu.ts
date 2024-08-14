@@ -1,13 +1,24 @@
+export const MenuList = {
+  BADGE: "badge",
+  BADGES: "badges",
+  FEMALE: "female",
+  MALE: "male",
+  REVISION: "revision",
+  TIP: "tips",
+} as const;
+
+export type MenuListType = (typeof MenuList)[keyof typeof MenuList];
+
 export const MENU = [
   {
-    id: "badge",
-    label: "Badge",
+    id: MenuList.BADGE,
+    label: "Badges",
     children: [
-      { id: "badges", label: "Badges", active: true },
-      { id: "female", label: "Female", active: true },
-      { id: "male", label: "Male", active: true },
-      { id: "revision", label: "Revision", active: true },
-      { id: "tip", label: "Tips", active: true },
+      { id: MenuList.BADGES, label: "Badges", active: true },
+      { id: MenuList.FEMALE, label: "Female", active: true },
+      { id: MenuList.MALE, label: "Male", active: true },
+      { id: MenuList.REVISION, label: "Revision", active: true },
+      { id: MenuList.TIP, label: "Tips", active: true },
     ],
     active: true,
   },
@@ -16,7 +27,7 @@ export const MENU = [
   { id: "jobs", label: "Jobs", children: [], active: false },
   { id: "keywords", label: "Keywords", children: [], active: false },
   { id: "profile", label: "Profile", children: [], active: false },
-  { id: "tips", label: "Tips", children: [], active: false },
+  { id: "tip", label: "Tips", children: [], active: false },
   { id: "user_status", label: "UserStatus", children: [], active: false },
 ];
 
