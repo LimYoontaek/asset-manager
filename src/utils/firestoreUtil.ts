@@ -11,7 +11,7 @@ export const getBadges = (storageRef: StorageReference) => {
       const jsonData = JSON.parse(await data.text()) as {
         json: { badges: JsonDataType };
       };
-      console.log(`badges.json downloaded.`, jsonData);
+      console.log(`badges.json from ${storageRef.name} downloaded.`, jsonData);
       return jsonData;
     };
 
