@@ -1,56 +1,34 @@
-import {
-  setDoc,
-  doc,
-  deleteDoc,
-  DocumentData,
-  QueryDocumentSnapshot,
-} from "firebase/firestore";
 import { JsonData, JsonEditor } from "json-edit-react";
-import { database } from "@util/firestoreSetup";
 import { useState } from "react";
+import { BadgeUnionType } from "@src/types/badges";
+import {
+  useJsonDataStore,
+  useMenuStore,
+  useSelectedDataStore,
+} from "@src/store/store";
+import { MenuList } from "@src/assets/menu";
 
-interface Props {
-  selectedBadge: QueryDocumentSnapshot<DocumentData, DocumentData>;
-  closeBadgeDetail: () => void;
-}
+const EditBadge = () => {
+  const selectedBadge = useSelectedDataStore.use.selectedBadge();
+  const selectedMenu = useMenuStore.use.selectedMenu();
 
-const EditBadge = ({ selectedBadge, closeBadgeDetail }: Props) => {
-  const [selectedBadgeData, setSelectedBadgeData] = useState<JsonData>(
-    selectedBadge.data(),
-  );
+  const [selectedBadgeData, setSelectedBadgeData] =
+    useState<BadgeUnionType | null>(selectedBadge);
   const [isEdited, setIsEdited] = useState<boolean>(false);
+  const selectedIndex = useSelectedDataStore.use.selectedIndex();
+  const resetSelectedData = useSelectedDataStore.use.resetSelectedData();
+  const updateSelectedData = useJsonDataStore.use.updateSelectedData();
+  const deleteSelectedData = useJsonDataStore.use.deleteSelectedData();
 
-  const updateBadgeData = async (id: string, newData: JsonData) => {
-    await setDoc(
-      doc(database, "badges/badges/list", id),
-      JSON.parse(JSON.stringify(newData)),
-    )
-      .then(() => {
-        console.log(`set success`);
-        closeBadgeDetail();
-      })
-      .catch((e) => {
-        console.log(`set failed`, e);
-      });
+  const updateBadgeData = (newData: BadgeUnionType | null) => {
+    if (newData) updateSelectedData(newData, selectedIndex);
+    resetSelectedData();
   };
 
-  const deleteBadge = async (id: string) => {
-    await deleteDoc(doc(database, "badges/badges/list", id))
-      .then(() => {
-        closeBadgeDetail();
-        setSelectedBadgeData({});
-
-        console.log(`remove success`);
-      })
-      .catch((e) => {
-        console.log(`remove failed`, e);
-      });
+  const deleteBadge = () => {
+    deleteSelectedData(selectedIndex);
+    resetSelectedData();
   };
-
-  // useEffect(() => {
-  //   console.log(selectedBadge);
-  //   setSelectedBadgeData(selectedBadge.data());
-  // }, [selectedBadge]);
 
   return (
     <>
@@ -58,32 +36,31 @@ const EditBadge = ({ selectedBadge, closeBadgeDetail }: Props) => {
         <button
           className="mr-4"
           onClick={() => {
-            closeBadgeDetail();
+            resetSelectedData();
           }}
         >
           Close
         </button>
         <p className="grow text-center">Detail</p>
-        {selectedBadge && selectedBadge.id && (
+        {selectedBadge && (
           <>
-            <button
-              className="h-fit w-fit"
-              onClick={() => {
-                deleteBadge(selectedBadge.id).catch((e) =>
-                  console.log(`delete badge error`, e),
-                );
-                setSelectedBadgeData({});
-              }}
-            >
-              Delete
-            </button>
+            {selectedMenu !== MenuList.REVISION &&
+              selectedMenu !== MenuList.TIP && (
+                <button
+                  className="h-fit w-fit"
+                  onClick={() => {
+                    deleteBadge();
+                  }}
+                >
+                  Delete
+                </button>
+              )}
+
             {isEdited && (
               <button
                 className="ml-4 h-fit w-fit"
                 onClick={() => {
-                  updateBadgeData(selectedBadge.id, selectedBadgeData).catch(
-                    (e) => console.log(`update badge data error`, e),
-                  );
+                  updateBadgeData(selectedBadgeData);
                 }}
               >
                 Save
@@ -94,9 +71,12 @@ const EditBadge = ({ selectedBadge, closeBadgeDetail }: Props) => {
       </div>
 
       <JsonEditor
-        data={selectedBadgeData}
-        setData={(newData) => setSelectedBadgeData(newData)}
-        onEdit={() => setIsEdited(true)}
+        data={selectedBadgeData as JsonData}
+        setData={(newData) => setSelectedBadgeData(newData as BadgeUnionType)}
+        onEdit={() => {
+          console.log(`isEdited`);
+          setIsEdited(true);
+        }}
         onDelete={() => setIsEdited(true)}
         keySort={true}
       />

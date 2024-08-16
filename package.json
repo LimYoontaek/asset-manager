@@ -10,7 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
     "@monaco-editor/react": "^4.6.0",
+    "@mui/material": "^5.16.6",
+    "@mui/x-tree-view": "^7.12.0",
     "firebase": "^10.12.4",
     "json-edit-react": "^1.15.4",
     "monaco-editor": "^0.50.0",

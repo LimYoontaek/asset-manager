@@ -1,58 +1,32 @@
-// import * as badges from "../../public/badges.json";
-// import { addDoc, collection, getDocs, setDoc, doc } from "firebase/firestore";
-// import { badgeRef, database } from "../utils/firestoreSetup";
-// import { BadgeType, GenderBadgeType } from "../types/badges";
+// load qa badges.json
 
-// const addDocument = async (badge: BadgeType) => {
-//   await addDoc(badgeRef, badge)
-//     .then(() => {
-//       console.log(`data added.`);
-//     })
-//     .catch((e) => {
-//       console.error(`data add failed`, e);
-//     });
-// };
+import { JsonDataType } from "@src/store/store";
+import { getBlob, ref, StorageReference } from "firebase/storage";
 
-// badges.json.badges.badges.map((badge: BadgeType) => {
-//   addDocument(badge).catch((e) => console.log(`batch operation error.`, e));
-// });
-// badges.json.badges.male.map((badge: GenderBadgeType) => {
-//   const newRef = collection(database, "badges/male/list");
-//   const addDocs = async () => {
-//     await addDoc(newRef, badge).then((data) => {
-//       console.log(`new doc added: `, data.id);
-//     });
-//   };
-//   addDocs().catch((e) => {
-//     console.error(`add male badge failed`, e);
-//   });
-// });
+// getBadges = (storageRef, setData) => void
+export const getBadges = (storageRef: StorageReference) => {
+  const jsonRef = ref(storageRef, "badges.json");
+  return getBlob(jsonRef).then((data: Blob) => {
+    const jsonParse = async () => {
+      const jsonData = JSON.parse(await data.text()) as {
+        json: { badges: JsonDataType };
+      };
+      console.log(`badges.json downloaded.`, jsonData);
+      return jsonData;
+    };
 
-// const copyDocs = () => {
-//   // const root = collection(database, "root");
-//   getDocs(badgeRef)
-//     .then((docs) => {
-//       docs.docs.map((docData) => {
-//         console.log(`doc info:`, docData.id);
-//         const newCollection = collection(database, "badges", "badges", "list");
+    return jsonParse()
+      .then((data) => {
+        return data.json.badges;
+      })
+      .catch((e) => {
+        console.error(`parsing error.`, e);
+      });
+  });
+};
 
-//         const addDocs = async () => {
-//           await addDoc(newCollection, docData.data())
-//             .then(() => {
-//               console.log(`doc added`, docData.id);
-//             })
-//             .catch((e) => {
-//               console.error(`doc add failed.`, e);
-//             });
-//         };
-//         addDocs().catch((e) => {
-//           console.error(`doc add failed.`, e);
-//         });
-//       });
-//     })
-//     .catch((e) => {
-//       console.error(`get docs failed`, e);
-//     });
-// };
+// 백업 파일 생성
+// uploadBackup = (storageRef) => void
 
-// copyDocs();
+// 새 파일 생성
+// uploadNewJson = (jsonRef, blob) => void
