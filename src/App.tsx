@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import AddBadge from "@src/AddBadge";
 import EditBadge from "@src/EditBadge";
-import { auth } from "@util/firestoreSetup";
+import { auth, storage } from "@util/firestoreSetup";
 import Login from "./Login";
 import { onAuthStateChanged } from "firebase/auth";
 import {
@@ -15,6 +15,7 @@ import Menu from "@src/Menu";
 import SubMenuList from "@src/SubMenuList";
 import { getBadges } from "@src/utils/firestoreUtil";
 import Export from "@src/Export";
+import { ref } from "firebase/storage";
 
 const App = () => {
   const selectedBadge = useSelectedDataStore.use.selectedBadge();
@@ -44,8 +45,9 @@ const App = () => {
   }, [setIsLogin]);
 
   useEffect(() => {
-    if (isLogin) {
-      getBadges(target)
+    if (isLogin && target) {
+      console.log(`get badges`, isLogin, target);
+      getBadges(ref(storage, target))
         .then((result) => {
           if (result) setJsonData(result);
         })
@@ -58,7 +60,10 @@ const App = () => {
   return (
     <>
       <h1 className="w-full text-center">Asset Manager</h1>
-      <div className="w-full text-center">{target.name.toUpperCase()}</div>
+      {isLogin && (
+        <div className="w-full text-center">{target.toUpperCase()}</div>
+      )}
+
       <div className="flex justify-between">
         <Login />
         {isLogin && <Export />}

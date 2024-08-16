@@ -1,8 +1,6 @@
 import { BadgeType, GenderBadgeType, TipsType } from "./../types/badges";
 import { MenuList, MenuListType } from "@src/assets/menu";
 import { BadgeUnionType } from "@src/types/badges";
-import { gsQAstoragePath, storage } from "@src/utils/firestoreSetup";
-import { ref, StorageReference } from "firebase/storage";
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { devtools } from "zustand/middleware";
 
@@ -24,12 +22,12 @@ export interface JsonDataType {
 }
 interface JsonDataState {
   json: JsonDataType | null;
-  target: StorageReference;
+  target: string;
   setJsonData: (data: JsonDataType) => void;
   addJsonData: (data: BadgeUnionType) => void;
   updateSelectedData: (data: BadgeUnionType, idx: number) => void;
   deleteSelectedData: (idx: number) => void;
-  setTarget: (target: StorageReference) => void;
+  setTarget: (target: string) => void;
 }
 
 interface SelectedDataState {
@@ -62,7 +60,7 @@ const initialJsonData = {
 const useJsonDataBase = create<JsonDataState>()(
   devtools((set) => ({
     json: null,
-    target: ref(storage, gsQAstoragePath),
+    target: "",
     setJsonData: (data: JsonDataType) => set(() => ({ json: data })),
     addJsonData: (data: BadgeUnionType) =>
       set((state) => {
@@ -148,7 +146,7 @@ const useJsonDataBase = create<JsonDataState>()(
             return { ...state };
         }
       }),
-    setTarget: (target: StorageReference) => set(() => ({ target })),
+    setTarget: (target: string) => set(() => ({ target })),
   })),
 );
 
