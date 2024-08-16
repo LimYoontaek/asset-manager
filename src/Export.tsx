@@ -155,11 +155,10 @@ const Export = () => {
               console.log(reg);
 
               if (reg) {
-                const revision = Number(reg[1]);
                 const numbering = Number(reg[2]) + 1;
                 const jsonRef = ref(
                   storageRef,
-                  `badges_${revision}_${numbering}.json`,
+                  `badges_${currentJson.revision}_${numbering}.json`,
                 );
                 console.log(`jsonRef`, jsonRef.name);
                 return jsonRef;
@@ -167,7 +166,7 @@ const Export = () => {
                 return null;
               }
             } else {
-              return ref(storageRef, `badges_${currentJson.revision}_1.json`);
+              return ref(storageRef, `badges_${currentJson.revision}.json`);
             }
           }
         })
