@@ -6,18 +6,24 @@ import {
   gsLivestoragePath,
 } from "@src/utils/firestoreSetup";
 import { getBadges } from "@src/utils/firestoreUtil";
+import { getDate } from "@src/utils/utils";
 import {
   StorageReference,
   ref,
   getBlob,
   listAll,
   uploadBytes,
+  getMetadata,
 } from "firebase/storage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Export = () => {
   const [isExporting, setIsExporting] = useState(false);
+  const [exportDate, setExportDate] = useState("");
+  const [publishDate, setPublishDate] = useState("");
   const setJsonData = useJsonDataStore.use.setJsonData();
+  const setTarget = useJsonDataStore.use.setTarget();
+  const target = useJsonDataStore.use.target();
 
   const exportBadges = async () => {
     //TODO: 파일 백업 후 새 데이터 전송
@@ -97,6 +103,7 @@ const Export = () => {
             .then((result) => {
               if (result) {
                 setJsonData(result);
+                setTarget(storageRef);
               }
             })
             .catch((e) => {
@@ -188,6 +195,7 @@ const Export = () => {
             .then((result) => {
               if (result) {
                 setJsonData(result);
+                setTarget(storageRef);
               }
             })
             .catch((e) => {
@@ -202,30 +210,68 @@ const Export = () => {
         });
     }
   };
+
+  useEffect(() => {
+    const qaRef = ref(storage, gsQAstoragePath);
+    const qaJsonRef = ref(qaRef, "badges.json");
+    const liveRef = ref(storage, gsLivestoragePath);
+    const liveJsonRef = ref(liveRef, "badges.json");
+
+    getMetadata(qaJsonRef)
+      .then((meta) => {
+        setExportDate(meta.updated);
+      })
+      .catch((e) => {
+        console.error(`get qa metadata failed`, e);
+      });
+
+    getMetadata(liveJsonRef)
+      .then((meta) => {
+        setPublishDate(meta.updated);
+      })
+      .catch((e) => {
+        console.error(`get live metadata failed`, e);
+      });
+  }, [target]);
   return (
     <div className="flex gap-4">
-      <button
-        className="disabled:border-none disabled:bg-stone-50 disabled:text-slate-300"
-        onClick={() => {
-          exportBadges().catch((e) => {
-            console.error(`export badge failed`, e);
-          });
-        }}
-        disabled={isExporting}
-      >
-        Export
-      </button>
-      <button
-        className="disabled:border-none disabled:bg-stone-50 disabled:text-slate-300"
-        onClick={() => {
-          publishBadges().catch((e) => {
-            console.error(`publish badge failed`, e);
-          });
-        }}
-        disabled={isExporting}
-      >
-        Publish
-      </button>
+      <div className="flex flex-col">
+        <p
+          className={`${exportDate > publishDate ? "text-green-500" : "text-red-200"}`}
+        >
+          {getDate(exportDate)}
+        </p>
+        <button
+          className="disabled:border-none disabled:bg-stone-50 disabled:text-slate-300"
+          onClick={() => {
+            exportBadges().catch((e) => {
+              console.error(`export badge failed`, e);
+            });
+          }}
+          disabled={isExporting}
+        >
+          Export
+        </button>
+      </div>
+
+      <div className="flex flex-col">
+        <p
+          className={`${publishDate > exportDate ? "text-green-500" : "text-red-200"}`}
+        >
+          {getDate(publishDate)}
+        </p>
+        <button
+          className="disabled:border-none disabled:bg-stone-50 disabled:text-slate-300"
+          onClick={() => {
+            publishBadges().catch((e) => {
+              console.error(`publish badge failed`, e);
+            });
+          }}
+          disabled={isExporting}
+        >
+          Publish
+        </button>
+      </div>
     </div>
   );
 };
