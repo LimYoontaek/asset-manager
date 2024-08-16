@@ -5,7 +5,6 @@ import {
   fileNameRegex,
   gsLivestoragePath,
 } from "@src/utils/firestoreSetup";
-import { getBadges } from "@src/utils/firestoreUtil";
 import { getDate } from "@src/utils/utils";
 import {
   StorageReference,
@@ -21,9 +20,7 @@ const Export = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [exportDate, setExportDate] = useState("");
   const [publishDate, setPublishDate] = useState("");
-  const setJsonData = useJsonDataStore.use.setJsonData();
   const setTarget = useJsonDataStore.use.setTarget();
-  const target = useJsonDataStore.use.target();
 
   const exportBadges = async () => {
     //TODO: 파일 백업 후 새 데이터 전송
@@ -33,6 +30,8 @@ const Export = () => {
 
     setIsExporting(true);
     const currentJson = useJsonDataStore.getState().json;
+
+    const isLive = useJsonDataStore.getState().target === gsLivestoragePath;
     if (currentJson) {
       const storageRef: StorageReference = ref(storage, gsQAstoragePath);
       const jsonRef = ref(storageRef, "badges.json");
@@ -47,17 +46,20 @@ const Export = () => {
       const backupRef = await listAll(storageRef)
         .then((result) => {
           if (result) {
+            const revision = isLive
+              ? currentJson.revision - 1
+              : currentJson.revision;
+            const regex = new RegExp(`badges_${revision}_(\\d+).json`);
             const latestFileName = result.items
-              .filter((item) => fileNameRegex.test(item.name))
+              .filter((item) => regex.test(item.name))
               .sort((a, b) => (a.name < b.name ? 1 : -1))[0];
             if (latestFileName) {
               console.log(`latestFileName`, latestFileName.name);
-              const reg = fileNameRegex.exec(latestFileName.name);
+              const reg = regex.exec(latestFileName.name);
               console.log(reg);
 
               if (reg) {
-                const revision = Number(reg[1]);
-                const numbering = Number(reg[2]) + 1;
+                const numbering = Number(reg[1]) + 1;
                 const jsonRef = ref(
                   storageRef,
                   `badges_${revision}_${numbering}.json`,
@@ -68,7 +70,7 @@ const Export = () => {
                 return null;
               }
             } else {
-              return ref(storageRef, `badges_${currentJson.revision}_1.json`);
+              return ref(storageRef, `badges_${revision}_1.json`);
             }
           }
         })
@@ -97,18 +99,9 @@ const Export = () => {
       });
 
       uploadBytes(jsonRef, blob)
-        .then(() => {
+        .then((result) => {
           console.log(`new json data uploaded.`);
-          getBadges(storageRef)
-            .then((result) => {
-              if (result) {
-                setJsonData(result);
-                setTarget(storageRef);
-              }
-            })
-            .catch((e) => {
-              console.error(`error after export new json`, e);
-            });
+          setExportDate(result.metadata.updated);
         })
         .catch((e) => {
           console.error(`new json data upload failed`, e);
@@ -188,18 +181,10 @@ const Export = () => {
         type: "application/json",
       });
       uploadBytes(jsonRef, blob)
-        .then(() => {
+        .then((result) => {
           console.log(`new json data uploaded.`);
-          getBadges(storageRef)
-            .then((result) => {
-              if (result) {
-                setJsonData(result);
-                setTarget(storageRef);
-              }
-            })
-            .catch((e) => {
-              console.error(`error after publish new json`, e);
-            });
+          // setTarget(gsLivestoragePath);
+          setPublishDate(result.metadata.updated);
         })
         .catch((e) => {
           console.error(`new json data upload failed`, e);
@@ -216,22 +201,30 @@ const Export = () => {
     const liveRef = ref(storage, gsLivestoragePath);
     const liveJsonRef = ref(liveRef, "badges.json");
 
-    getMetadata(qaJsonRef)
-      .then((meta) => {
-        setExportDate(meta.updated);
+    Promise.all([getMetadata(qaJsonRef), getMetadata(liveJsonRef)])
+      .then((results) => {
+        setExportDate(results[0].updated);
+        setPublishDate(results[1].updated);
       })
       .catch((e) => {
-        console.error(`get qa metadata failed`, e);
+        console.error(`get metadata failed`, e);
       });
+  }, []);
 
-    getMetadata(liveJsonRef)
-      .then((meta) => {
-        setPublishDate(meta.updated);
-      })
-      .catch((e) => {
-        console.error(`get live metadata failed`, e);
-      });
-  }, [target]);
+  useEffect(() => {
+    const exportTime = new Date(exportDate).getTime();
+    const publishTime = new Date(publishDate).getTime();
+    console.log(`set latest json data`, exportTime, publishTime);
+
+    if (!isNaN(exportTime) && !isNaN(publishTime)) {
+      if (exportTime > publishTime) {
+        setTarget(gsQAstoragePath);
+      } else {
+        setTarget(gsLivestoragePath);
+      }
+    }
+  }, [exportDate, publishDate, setTarget]);
+
   return (
     <div className="flex gap-4">
       <div className="flex flex-col">
