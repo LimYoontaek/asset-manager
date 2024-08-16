@@ -266,7 +266,7 @@ const Export = () => {
               console.error(`publish badge failed`, e);
             });
           }}
-          disabled={isExporting}
+          disabled={isExporting || publishDate > exportDate}
         >
           Publish
         </button>
